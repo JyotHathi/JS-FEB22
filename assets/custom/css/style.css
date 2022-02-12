@@ -1,0 +1,23 @@
+body{
+    background-color: #ebedef  
+}
+.logo
+{
+    width:60px; 
+    height:60px;
+}
+.navbarItem{
+    cursor: pointer;
+}
+.text-blue{
+    color: #4a235a ;
+}
+.img-max-size
+{
+    max-height:250px !important;
+}
+.descriptionMaxSize{
+    max-height:250px !important;
+    overflow:auto;
+    text-align: justify;
+}

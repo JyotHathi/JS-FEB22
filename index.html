@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Head Section -->
+<head>
+    <title>Javascript - FEB22</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="./assets/third-party/js/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <script src="./assets/third-party/js/bootstrap.min.js" type="text/javascript"></script>
+    <link href="./assets/third-party/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="./assets/third-party/css/font-awesome.min.css" type="text/css" rel="stylesheet" />
+
+    <link href="./assets/custom/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="./js/script.js" type="text/javascript"></script>
+</head>
+
+<!-- Body Section -->
+<body onload="pageLoad()">
+
+    <!-- Navigation Panel -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="./assets/images/logo.png" class="logo rounded-circle" alt="logo" />
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item navbarItem" onclick="activeTabChange('product')">
+                        <a class="nav-link" id="product">Products</a>
+                    </li>
+                    <li class="nav-item navbarItem" onclick="activeTabChange('category')">
+                        <a class="nav-link" id="category">Categories</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product List -->
+    <div class="container-fluid mt-2" id="productSection" style="display: none">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-sm-12 d-flex justify-content-between">
+                <h1 class="text-blue">
+                    <u>List of Product:</u>
+                </h1>
+                <!-- Loader -->
+                <div id="productLoader">
+                    <div class="mt-2 d-flex justify-content-center">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="row mt-2 mb-2">
+            <div class="col-sm-12 d-flex justify-content-end">
+                <button class="btn btn-primary font-weight-bold">+ Add Product</button>
+            </div>
+        </div>
+        <!-- Add Button -->
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr class="bg-primary">
+                            <th class="text-center">Product Image</th>
+                            <th class="text-center navbarItem" onclick="changeSortingOrderOfProducts()">
+                                Product Title
+                                <i class="fa fa-sort-asc" id="productTitleWithOrdering"></i>
+                            </th>
+                            <th class="text-center">Category</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableId">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category List -->
+    <div class="container-fluid mt-2" id="categorySection" style="display: none">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-sm-12 d-flex justify-content-between">
+                <h1 class="text-blue">
+                    <u>List of Category:</u>
+                </h1>
+                <!-- Loader -->
+                <div id="categoryLoader">
+                    <div class="mt-2 d-flex justify-content-center">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <!-- List of category -->
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr class="bg-info">
+                            <th class="text-center">Category Name</th>
+                            <th class="text-center">View Products</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryProductBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <hr />
+        <!-- Product by category -->
+        <div class="card mt-2" id="productByCategoryCard" style="display: none">
+            <div class="card-header bg-light d-flex justify-content-between">
+                <h2 id="productTableTittle" class="text-primary">Products of </h2>
+                <i class="fa fa-lg fa-close" onclick="closeProductByCategoryInfo()"></i>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr class="bg-success">
+                            <th class="text-center">Product Image</th>
+                            <th class="text-center">Product Title</th>
+                            <th class="text-center">Category</th>
+                            <th class="text-center">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsByCategoryTableBody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal To Delete Product -->
+    <div class="modal" id="deleteConfirmation" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body d-flex">
+                    <i class="fa fa-exclamation-circle mt-2 mr-2"></i> 
+                    <label> Are You Sure You Want to delete this product ?</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-close"> No</i>
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteProductOnConfim()">
+                        <i class="fa fa fa-check">Yes</i> 
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Update Product Modal -->
+    <div class="modal" id="deleteConfirmation" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEditModalTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body d-flex">
+                    <i class="fa fa-exclamation-circle mt-2 mr-2"></i> 
+                    <label> Are You Sure You Want to delete this product ?</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-close"> No</i>
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteProductOnConfim()">
+                        <i class="fa fa fa-check">Yes</i> 
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
