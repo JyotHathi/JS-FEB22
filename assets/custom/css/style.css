@@ -21,3 +21,6 @@ body{
     overflow:auto;
     text-align: justify;
 }
+.table-verflow{
+    overflow:auto;
+}
