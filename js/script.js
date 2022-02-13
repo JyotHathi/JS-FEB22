@@ -3,7 +3,8 @@
 const GET_CATEGORY_LIST_URL = "https://fakestoreapi.com/products/categories";
 const GET_PRODUCT_BY_CATEGORY_URL = "https://fakestoreapi.com/products/category/";
 const GET_ALL_LIST_OF_PRODUCTS_URL = "https://fakestoreapi.com/products";
-const DELETE_PRODUCT_URL="https://fakestoreapi.com/products/"
+const DELETE_PRODUCT_URL = "https://fakestoreapi.com/products/"
+
 
 const NO_RECORDS_FOUND = "No Records Found";
 const ERROR_OCCURED = "An Error Occured";
@@ -31,9 +32,19 @@ const allProductsPageDetails = {
     sortingOrder: true,
     orderingFieldId: "productTitleWithOrdering",
     productToOperate: null,
-    addUpdateModalId:"addEditModalTitle",
-    isEdit:false
+    addUpdateModalId: "addUpdateProductModal",
+    addUpdateModalTitle: "addEditModalTitle",
+    isEdit: false,
+    formDetails:
+    {
+        titleId: "productTitleInForm",
+        priceId: "productPriceInForm",
+        descriptionId: "descriptionInForm",
+        categoryId: "categorySelectionInForm",
+        fileId: "productImageInForm"
+    }
 }
+const fileUploadPath = "/upload/image/"
 
 //#endregion
 
@@ -50,7 +61,7 @@ const getListOfCategories = async () => {
             'Access-Control-Allow-Origin': '*'
         }
     }).then((response) => response.json())
-        .catch((error) => []);
+        .catch((error) => { alert(ERROR_OCCURED); });
     return categoryResponse;
 }
 
@@ -67,7 +78,7 @@ const getProductsByCategory = async (categoryName) => {
                 'Access-Control-Allow-Origin': '*'
             }
         }).then((response) => response.json())
-            .catch((error) => []);
+            .catch((error) => { alert(ERROR_OCCURED); });
         return response;
     }
     else {
@@ -86,7 +97,7 @@ const getAllProducts = async () => {
             'Access-Control-Allow-Origin': '*'
         }
     }).then((response) => response.json())
-        .catch((error) => []);
+        .catch((error) => { alert(ERROR_OCCURED); });
     return response;
 }
 
@@ -94,17 +105,66 @@ const getAllProducts = async () => {
  * @description To Delete Product
  * @param  productId Id Of Product which you want to delete
  */
-const deleteProduct = async ()=>{
-    if(allProductsPageDetails.productToOperate!=null)
-    {
-        await fetch(DELETE_PRODUCT_URL+allProductsPageDetails.productToOperate,{
+const deleteProduct = async () => {
+    if (allProductsPageDetails.productToOperate != null) {
+        await fetch(DELETE_PRODUCT_URL + allProductsPageDetails.productToOperate, {
             method: 'DELETE',
             headers: {
                 'Access-Control-Allow-Origin': '*'
             }
-        }).then((response)=>{alert("Product Deleted Successfully")})
-        .catch((error)=>{alert("An Error Occured While Deleting Product")})
+        }).then((response) => { alert("Product Deleted Successfully") })
+            .catch((error) => { alert("An Error Occured While Deleting Product") })
     }
+}
+
+const addProduct = async (requestBody) => {
+    if (requestBody) {
+        await fetch(GET_ALL_LIST_OF_PRODUCTS_URL, {
+            method: "POST",
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify(requestBody)
+        }).then(
+            (response) => {
+                alert("Product Added Successfully")
+            }
+        )
+        .catch((error) => { alert(ERROR_OCCURED) });
+    }
+
+}
+
+const editProduct = async (productId, requestBody) => {
+    if (productId != null && requestBody) {
+        await fetch(GET_ALL_LIST_OF_PRODUCTS_URL + `/${productId}`, {
+            method: "PUT",
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        }).then((response) => { alert("Product Added Successfully") })
+            .catch((error) => { 
+                console.log(error);
+                alert(ERROR_OCCURED) 
+            });
+    }
+
+}
+
+const getProductById = async (productId) => {
+    if (productId != null) {
+        let response = await fetch(GET_ALL_LIST_OF_PRODUCTS_URL + `/${productId}`, {
+            method: "GET",
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            }
+        }).then((response) => response.json())
+            .catch((error) => { alert(ERROR_OCCURED) });
+        return response;
+    }
+
 }
 //#endregion 
 
@@ -153,6 +213,36 @@ const pageLoad = () => {
 
 //#region --------- Product -----------
 
+// Load Category Selection 
+const loadCategories = async () => {
+    let categories = await getListOfCategories();
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+        let categorySelection = document.getElementById(allProductsPageDetails.formDetails.categoryId);
+        if (categorySelection) {
+            let categoryData = `<option value="">Select Category</option>`;
+            categories.forEach((ele) => {
+                categoryData += `<option value="${ele}">${ele.toString().toUpperCase()}</option>`
+            });
+            categorySelection.innerHTML = categoryData;
+        }
+    }
+}
+
+//Clear Product Form
+const clearProductForm = async () => {
+    let productTitle = document.getElementById(allProductsPageDetails.formDetails.titleId);
+    let productPrice = document.getElementById(allProductsPageDetails.formDetails.priceId);
+    let productDesc = document.getElementById(allProductsPageDetails.formDetails.descriptionId);
+    let productCat = document.getElementById(allProductsPageDetails.formDetails.categoryId);
+    let productImage = document.getElementById(allProductsPageDetails.formDetails.fileId);
+    productTitle ? productTitle.value = "" : null;
+    productPrice ? productPrice.value = "" : null;
+    productDesc ? productDesc.value = "" : null;
+    productCat ? productCat.value = "" : null;
+    allProductsPageDetails.isEdit = false;
+    //productImage && productImage.files ?  productImage.files = [] :null;
+}
+
 // To change sorting order of Products on Click of title
 const changeSortingOrderOfProducts = () => {
     let sorterIcon = document.getElementById(allProductsPageDetails.orderingFieldId);
@@ -163,13 +253,16 @@ const changeSortingOrderOfProducts = () => {
     loadProductSection();
 }
 
+
 // Load Product Section Related Data
 const loadProductSection = async () => {
     showHideLoader(true, "productLoader");
     try {
+        allProductsPageDetails.isEdit = false;
+        let modalTitleForAddEdit = document.getElementById(allProductsPageDetails.addUpdateModalTitle);
+        modalTitleForAddEdit ? modalTitleForAddEdit.innerHTML = "Add Product" : null;
         let products = await getAllProducts();
         let tableBodyData = document.getElementById(allProductsPageDetails.allDetailsTableId);
-
         if (products.length) {
             let productData = "";
             products.forEach((product) => {
@@ -189,7 +282,7 @@ const loadProductSection = async () => {
                             </td>   
                             <td class="text-center">
                                 <div class="d-flex justify-content-between mt-5">
-                                    <i class="fa fa-pencil" style="color:blue" onclick="editProduct(${product.id})"></i>
+                                    <i class="fa fa-pencil" style="color:blue" data-toggle="modal" data-target="#addUpdateProductModal" onclick="loadForeditProduct(${product.id})"></i>
                                     <i class="fa fa-trash" style="color:red" data-toggle="modal" data-target="#deleteConfirmation" onclick="confirmDeleteProduct(${product.id})"></i>
                                 </div>        
                             </td>                         
@@ -204,6 +297,7 @@ const loadProductSection = async () => {
                         <td colspan="4" class="text-primary text-center">${NO_RECORDS_FOUND}</td>
                     </tr>` : null;
         }
+        await loadCategories();
     }
     catch (error) {
         console.log(error);
@@ -213,13 +307,64 @@ const loadProductSection = async () => {
     showHideLoader(false, "productLoader");
 }
 
-// Add Product Data
-const addProduct = (productId) => {
+// Save Product Data
+const saveProduct = async () => {
+    showHideLoader(true, "productLoader");
 
+    try {
+        let productTitle = document.getElementById(allProductsPageDetails.formDetails.titleId);
+        let productPrice = document.getElementById(allProductsPageDetails.formDetails.priceId);
+        let productDesc = document.getElementById(allProductsPageDetails.formDetails.descriptionId);
+        let productCat = document.getElementById(allProductsPageDetails.formDetails.categoryId);
+        let productImage = document.getElementById(allProductsPageDetails.formDetails.fileId);
+        let productDetails = {
+            "title": productTitle ? productTitle.value : "",
+            "price": productPrice ? productPrice.value : "",
+            "description": productDesc ? productDesc.value : "",
+            "image": productImage && productImage.files && productImage.files[0] ? fileUploadPath + productImage.files[0].name : "",
+            "category": productCat ? productCat.value : "",
+        }
+        if (productDetails) {
+            if (allProductsPageDetails.isEdit) {
+                await editProduct(allProductsPageDetails.productToOperate, productDetails);
+            }
+            else {
+                await addProduct(productDetails)
+            }
+            await loadProductSection();
+        }
+    }
+    catch (error) {
+        console.log(error);
+        alert(ERROR_OCCURED)
+    }
+    showHideLoader(false, "productLoader");
 }
 
-// Edit Product Data
-const editProduct = (productId) => {
+// Set data for Edit Product
+const loadForeditProduct = async (productId) => {
+    await clearProductForm().then(async (response) => {
+        if (productId != null) {
+            let productData = await getProductById(productId);
+            if (productData) {
+                let productTitle = document.getElementById(allProductsPageDetails.formDetails.titleId);
+                let productPrice = document.getElementById(allProductsPageDetails.formDetails.priceId);
+                let productDesc = document.getElementById(allProductsPageDetails.formDetails.descriptionId);
+                let productCat = document.getElementById(allProductsPageDetails.formDetails.categoryId);
+                //let productImage = document.getElementById(allProductsPageDetails.formDetails.fileId);   
+
+                productTitle ? productTitle.value = productData.title : "";
+                productPrice ? productPrice.value = productData.price : "";
+                productDesc ? productDesc.value = productData.description : "";
+                productCat ? productCat.value = productData.category : "";
+                console.log(productData.category);
+            }
+        }
+    });
+    let modalTitleForAddEdit = document.getElementById(allProductsPageDetails.addUpdateModalTitle);
+    modalTitleForAddEdit ? modalTitleForAddEdit.innerHTML = "Edit Product" : null;
+    allProductsPageDetails.productToOperate = productId;
+    allProductsPageDetails.isEdit = true;
 
 }
 
@@ -229,11 +374,10 @@ const confirmDeleteProduct = (productId) => {
 }
 
 // Delete Data on Confirm
-const deleteProductOnConfim = async () =>{
-    window.scroll(0,0);
+const deleteProductOnConfim = async () => {
+    window.scroll(0, 0);
     showHideLoader(true, "productLoader");
-    if(allProductsPageDetails.productToOperate!=null)
-    {
+    if (allProductsPageDetails.productToOperate != null) {
         await deleteProduct();
         await loadProductSection();
     }
