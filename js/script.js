@@ -117,6 +117,10 @@ const deleteProduct = async () => {
     }
 }
 
+/**
+ * @description To Update Product Details
+ * @param requestBody - Product details which need to pass in rqeuest
+ */
 const addProduct = async (requestBody) => {
     if (requestBody) {
         await fetch(GET_ALL_LIST_OF_PRODUCTS_URL, {
@@ -135,6 +139,11 @@ const addProduct = async (requestBody) => {
 
 }
 
+/**
+ * @description To Update Product Details
+ * @param productId - Id Of Product which want to update Product
+ * @param requestBody - Product details which need to pass in rqeuest
+ */
 const editProduct = async (productId, requestBody) => {
     if (productId != null && requestBody) {
         await fetch(GET_ALL_LIST_OF_PRODUCTS_URL + `/${productId}`, {
@@ -144,7 +153,7 @@ const editProduct = async (productId, requestBody) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(requestBody)
-        }).then((response) => { alert("Product Added Successfully") })
+        }).then((response) => { alert("Product Updated Successfully") })
             .catch((error) => { 
                 console.log(error);
                 alert(ERROR_OCCURED) 
@@ -153,6 +162,11 @@ const editProduct = async (productId, requestBody) => {
 
 }
 
+/**
+ * @description To get product by Id
+ * @param  productId Id of product which want to get
+ * @returns Object of product
+ */
 const getProductById = async (productId) => {
     if (productId != null) {
         let response = await fetch(GET_ALL_LIST_OF_PRODUCTS_URL + `/${productId}`, {
