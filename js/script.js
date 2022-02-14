@@ -290,8 +290,8 @@ const loadProductSection = async () => {
                             </td>
                             <td class="text-center">${product.category}</td>
                             <td class="text-center">
-                                <div class="descriptionMaxSize">
-                                    ${product.description}
+                                <div>
+                                    ${product.price}
                                 </div>
                             </td>   
                             <td class="text-center">
@@ -426,8 +426,8 @@ const productByCategory = async (category) => {
                             </td>
                             <td class="text-center">${product.category}</td>
                             <td class="text-center">
-                                <div class="descriptionMaxSize">
-                                    ${product.description}
+                                <div>
+                                    ${product.price}
                                 </div>
                             </td>
                         </tr>
